@@ -9,6 +9,7 @@ import Schedule from "@/pages/schedule";
 import Reminders from "@/pages/reminders";
 import NotFound from "@/pages/not-found";
 
+
 function Router() {
   return (
     <Switch>

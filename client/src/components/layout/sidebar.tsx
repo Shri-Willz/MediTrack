@@ -10,6 +10,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 interface SidebarProps {
   className?: string;
@@ -23,7 +24,6 @@ export function Sidebar({ className }: SidebarProps) {
     { href: "/medications", label: "My Medications", icon: Pill },
     { href: "/schedule", label: "Schedule", icon: CalendarCheck },
     { href: "/reminders", label: "Reminders", icon: Bell },
-    { href: "/reports", label: "Reports", icon: FileText },
   ];
 
   const bottomNavItems = [

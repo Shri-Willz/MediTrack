@@ -40,21 +40,19 @@ export function Header({ onMenuClick }: HeaderProps) {
           </div>
         </div>
         
-        <div className="ml-4 flex items-center md:ml-6">
+        <div className="ml-2 flex items-center md:ml-6">
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-500">
             <Bell className="h-5 w-5" />
           </Button>
           
           <div className="ml-3 relative">
-            <div>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User profile" />
-                  <AvatarFallback>
-                    <User className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
+            <div className="h-8 w-13 flex  text-gray-400 hover:text-gray-500">
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
             </div>
           </div>
         </div>
