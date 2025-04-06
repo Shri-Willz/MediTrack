@@ -4,4 +4,9 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+<<<<<<< HEAD
 .env
+=======
+.env
+.replit
+>>>>>>> 5890106f2a889d0f89f822a80a07b37daddcfa73
