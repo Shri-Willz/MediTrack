@@ -3,10 +3,17 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import {
+  insertUserSchema,
   insertMedicationSchema,
   insertScheduleSchema,
-  insertReminderSchema
+  insertReminderSchema,
+  users,
+  medications
 } from "@shared/schema";
+import dotenv from 'dotenv';
+dotenv.config();
+import {db} from "./drizzle/migrations/db"
+import { clerkClient, requireAuth, getAuth } from '@clerk/express'
 
 const validateBody = <T>(schema: z.ZodType<T>) => (
   req: Request,
@@ -23,6 +30,20 @@ const validateBody = <T>(schema: z.ZodType<T>) => (
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes - all prefixed with /api
+
+ // getting info form user
+  app.get('/protected', requireAuth(), async (req, res) => {
+    // Use `getAuth()` to get the user's `userId`
+    const { userId }  = getAuth(req)
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized: No userId" });
+    }  
+    // Use Clerk's JavaScript Backend SDK to get the user's User object
+    const user = await clerkClient.users.getUser(userId )
+
+    return res.json({ user })
+  })
   
   // Medications routes
   app.get("/api/medications", async (req, res) => {
@@ -43,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!medication) {
         return res.status(404).json({ message: "Medication not found" });
       }
-      
+      medication
       res.json(medication);
     } catch (error) {
       res.status(500).json({ message: "Error fetching medication", error });

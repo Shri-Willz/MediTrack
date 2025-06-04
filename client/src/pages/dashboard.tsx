@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { 
-  PillIcon, 
-  CalendarCheck, 
-  AlertTriangle, 
-  Plus 
+import {
+  PillIcon,
+  CalendarCheck,
+  AlertTriangle,
+  Plus
 } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -168,21 +168,21 @@ export default function Dashboard() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-              <StatCard 
-                title="Active Medications" 
+              <StatCard
+                title="Active Medications"
                 value={statsLoading ? "Loading..." : stats?.activeMeds || 0}
                 icon={PillIcon}
                 colorClass="bg-primary-100 text-primary-600"
               />
-              <StatCard 
-                title="Today's Doses" 
+              <StatCard
+                title="Today's Doses"
                 value={statsLoading ? "Loading..." : stats?.todayDoses?.completed || 0}
                 subtitle={statsLoading ? "" : `/ ${stats?.todayDoses?.total || 0} completed`}
                 icon={CalendarCheck}
                 colorClass="bg-green-100 text-green-600"
               />
-              <StatCard 
-                title="Refills Needed" 
+              <StatCard
+                title="Refills Needed"
                 value={statsLoading ? "Loading..." : stats?.refillsNeeded || 0}
                 icon={AlertTriangle}
                 colorClass="bg-amber-100 text-amber-600"
@@ -192,15 +192,15 @@ export default function Dashboard() {
             {/* Schedule Section */}
             <section className="mb-8">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Today's Schedule</h3>
-              
+
               {scheduleLoading ? (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
                   Loading schedules...
                 </div>
               ) : (
-                <ScheduleTimeline 
-                  schedules={schedules} 
-                  onMarkAsTaken={handleMarkAsTaken} 
+                <ScheduleTimeline
+                  schedules={schedules}
+                  onMarkAsTaken={handleMarkAsTaken}
                 />
               )}
             </section>
@@ -211,42 +211,41 @@ export default function Dashboard() {
                 <h3 className="text-lg leading-6 font-medium text-gray-900">My Medications</h3>
                 <div className="flex space-x-3">
                   <Button variant="outline" size="sm" className="hidden sm:flex">
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-4 w-4 mr-2" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" 
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
                       />
                     </svg>
                     Filter
                   </Button>
                   <Button variant="outline" size="sm" className="hidden sm:flex">
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className="h-4 w-4 mr-2" 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" 
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
                       />
                     </svg>
                     Sort
                   </Button>
                 </div>
               </div>
-
               {medicationsLoading ? (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
                   Loading medications...
@@ -254,9 +253,9 @@ export default function Dashboard() {
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {medications.map((medication) => (
-                    <MedicationCard 
-                      key={medication.id} 
-                      medication={medication} 
+                    <MedicationCard
+                      key={medication.id}
+                      medication={medication}
                       onUpdate={handleUpdateMedication}
                     />
                   ))}
@@ -279,8 +278,8 @@ export default function Dashboard() {
               Enter the details of your medication below.
             </DialogDescription>
           </DialogHeader>
-          <MedicationForm 
-            onSubmit={(data) => addMedicationMutation.mutate(data)} 
+          <MedicationForm
+            onSubmit={(data) => { addMedicationMutation.mutate(data)}}
             onCancel={() => setShowAddMedication(false)}
           />
         </DialogContent>

@@ -30,6 +30,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+
 // Extend the medication schema with validations
 const formSchema = insertMedicationSchema
   .extend({
@@ -51,15 +52,14 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface MedicationFormProps {
   defaultValues?: Partial<FormValues>;
-  onSubmit: (data: FormValues) => void;
+  onSubmit : (data:FormValues) => void; 
   onCancel: () => void;
+  
 }
 
-export function MedicationForm({ 
-  defaultValues, 
-  onSubmit, 
-  onCancel 
-}: MedicationFormProps) {
+export function MedicationForm({ defaultValues,onSubmit,onCancel}: MedicationFormProps)
+ {
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,6 +76,7 @@ export function MedicationForm({
       ...defaultValues,
     },
   });
+
 
   return (
     <Form {...form}>
@@ -319,7 +320,7 @@ export function MedicationForm({
                     min={0} 
                     placeholder="Number of refills" 
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0) }
                     value={field.value}
                   />
                 </FormControl>

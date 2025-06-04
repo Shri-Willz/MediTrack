@@ -20,7 +20,7 @@ export function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
 
   const navItems = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/medications", label: "My Medications", icon: Pill },
     { href: "/schedule", label: "Schedule", icon: CalendarCheck },
     { href: "/reminders", label: "Reminders", icon: Bell },

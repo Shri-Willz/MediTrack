@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+import "dotenv/config";
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -51,7 +53,7 @@ app.use((req, res, next) => {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (app.get("env") === "development") {
-    await setupVite(app, server);         
+    await setupVite(app, server);
   } else {
     serveStatic(app);
   }
@@ -62,6 +64,5 @@ app.use((req, res, next) => {
   const port = 5000;
   server.listen(5000, () => {
     log(`Server listening on port ${port}`);
-  }
-  );
+  });
 })();

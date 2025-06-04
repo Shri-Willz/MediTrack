@@ -161,7 +161,7 @@ export function MedicationCard({ medication, onUpdate }: MedicationCardProps) {
                 </DialogHeader>
                 <MedicationForm 
                   defaultValues={medication} 
-                  onSubmit={(data) => {
+                  onSubmit={(data: Partial<{ id: number; name: string; dosage: string; form: "tablet" | "capsule" | "liquid" | "injection" | "patch" | "inhaler" | "cream" | "other"; instructions: string | null; frequency: "other" | "once_daily" | "twice_daily" | "three_times_daily" | "four_times_daily" | "as_needed" | "weekly" | "monthly"; purpose: string | null; startDate: Date; endDate: Date | null; quantity: number; refills: number | null; status: "active" | "inactive" | "completed"; userId: number | null; }>) => {
                     onUpdate(medication.id, data);
                     setShowEditForm(false);
                   }} 
