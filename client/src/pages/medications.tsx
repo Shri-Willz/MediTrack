@@ -36,6 +36,25 @@ export default function Medications() {
   const [sortBy, setSortBy] = useState<string>("name");
   const [filterStatus, setFilterStatus] = useState<string>("all");
 
+
+interface userdata {
+    id: string
+  }
+
+const {
+    data: userdata,
+    isLoading: userLoading,
+  } = useQuery<userdata>({
+    queryKey: ['api/users'],
+    queryFn: async () => {
+      const res = await fetch('/api/users');
+      if (!res.ok) throw new Error('Failed to fetch user');
+
+      const data = await res.json();
+      return data;
+    },
+});
+
   // Fetch medications
   const { data: medications = [], isLoading: medicationsLoading } = useQuery<Medication[]>({
     queryKey: ['/api/medications'],
@@ -45,6 +64,7 @@ export default function Medications() {
   const addMedicationMutation = useMutation({
     mutationFn: async (newMedication: any) => {
       return apiRequest('POST', '/api/medications', newMedication);
+      
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/medications'] });
@@ -65,7 +85,7 @@ export default function Medications() {
 
   // Update medication mutation
   const updateMedicationMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: Partial<Medication> }) => {
+    mutationFn: async ({ id, data }: { id: string, data: Partial<Medication> }) => {
       return apiRequest('PATCH', `/api/medications/${id}`, data);
     },
     onSuccess: () => {
@@ -83,6 +103,31 @@ export default function Medications() {
       });
     },
   });
+
+    const DeleteMedication = useMutation({
+      mutationFn:(id:string) => {
+        return apiRequest('delete',`/api/medications/${id}`)
+      },
+      onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['/api/stats']});
+      queryClient.invalidateQueries({ queryKey: ['/api/medications']});
+        toast({
+          title: "Medication Deleted",
+          description: "Your medication has been deleted successfully.",
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: "Failed to Delete medication. Please try again.",
+          variant: "destructive",
+        });
+      }
+    })
+  
+    const handleDeleteMedication = (id:string) => {
+      DeleteMedication.mutate(id);
+    }
 
   // Filter and sort medications
   const filteredMedications = medications
@@ -109,7 +154,7 @@ export default function Medications() {
       return 0;
     });
 
-  const handleUpdateMedication = (id: number, data: Partial<Medication>) => {
+  const handleUpdateMedication = (id: string, data: Partial<Medication>) => {
     updateMedicationMutation.mutate({ id, data });
   };
 
@@ -221,6 +266,7 @@ export default function Medications() {
                     key={medication.id} 
                     medication={medication} 
                     onUpdate={handleUpdateMedication}
+                    onDelete={handleDeleteMedication}
                   />
                 ))}
               </div>
@@ -241,9 +287,10 @@ export default function Medications() {
               Enter the details of your medication below.
             </DialogDescription>
           </DialogHeader>
-          <MedicationForm 
+          <MedicationForm
             onSubmit={(data) => addMedicationMutation.mutate(data)} 
             onCancel={() => setShowAddMedication(false)}
+            user_Id={userdata?.id ?? ""}
           />
         </DialogContent>
       </Dialog>

@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import {
   PanelLeft,
   LayoutDashboard,
@@ -10,14 +10,13 @@ import {
   HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 
 interface SidebarProps {
   className?: string;
 }
 
 export function Sidebar({ className }: SidebarProps) {
-  const [location] = useLocation();
+  const location = useLocation();
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -46,10 +45,10 @@ export function Sidebar({ className }: SidebarProps) {
         {navItems.map((item) => (
           <Link
             key={item.href}
-            href={item.href}
+            to={item.href}
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
-              location === item.href
+              location.pathname === item.href
                 ? "bg-primary-50 text-primary-700"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             )}
@@ -57,7 +56,7 @@ export function Sidebar({ className }: SidebarProps) {
             <item.icon
               className={cn(
                 "mr-3 h-5 w-5",
-                location === item.href ? "text-primary-500" : "text-gray-400"
+                location.pathname === item.href ? "text-primary-500" : "text-gray-400"
               )}
             />
             {item.label}
@@ -69,7 +68,7 @@ export function Sidebar({ className }: SidebarProps) {
         {bottomNavItems.map((item) => (
           <Link
             key={item.href}
-            href={item.href}
+            to={item.href}
             className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           >
             <item.icon className="mr-3 h-5 w-5 text-gray-400" />

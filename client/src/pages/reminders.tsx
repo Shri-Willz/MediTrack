@@ -49,6 +49,18 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+// import { useAuth } from "@clerk/clerk-react";
+// import { useNavigate } from "react-router";
+
+
+
+// const { isSignedIn } = useAuth()
+// const navigate = useNavigate()
+
+
+// if (!isSignedIn) {
+//   navigate("/")
+// }  
 
 // Define the form schema for reminders
 const reminderFormSchema = z.object({
@@ -76,7 +88,6 @@ export default function Reminders() {
     queryKey: ['/api/reminders'],
   });
 
-  // Fetch medications for the dropdown
   const { data: medications = [] } = useQuery<Medication[]>({
     queryKey: ['/api/medications'],
   });

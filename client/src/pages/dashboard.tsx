@@ -25,29 +25,100 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { MedicationForm } from "@/components/medications/medication-form";
-import { Medication, Schedule } from "@shared/schema";
+import { Medication, Schedule, users } from "@shared/schema";
+import { useAuth} from "@clerk/clerk-react";
+import { useNavigate } from "react-router";
+import { Stats } from "fs";
+
+
 
 export default function Dashboard() {
   const isMobile = useMobile();
   const { toast } = useToast();
   const [showSidebar, setShowSidebar] = useState(false);
   const [showAddMedication, setShowAddMedication] = useState(false);
+  const { isSignedIn } = useAuth()
+  const navigate = useNavigate()
 
-  // Fetch dashboard stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/stats'],
-  });
 
-  // Fetch medications
-  const { data: medications = [], isLoading: medicationsLoading } = useQuery<Medication[]>({
-    queryKey: ['/api/medications'],
-  });
+  if (!isSignedIn) {
+    navigate("/")
+  }
 
-  // Fetch today's schedule
-  const today = new Date().toISOString().split('T')[0];
-  const { data: scheduleData = [], isLoading: scheduleLoading } = useQuery<Schedule[]>({
-    queryKey: ['/api/schedules', { date: today }],
-  });
+  interface userdata {
+    id: string
+  }
+
+  interface Stats {
+    activeMeds:number,
+    todayDoses:number,
+    refillsNeeded:number
+
+  }
+
+
+// 1. Fetch stats (after user is loaded)
+const {
+  data: stats,
+  isLoading: statsLoading,
+} = useQuery<Stats>({
+  queryKey: ['/api/stats'],
+  queryFn: async () => {
+    const res = await fetch('/api/stats');
+    if (!res.ok) throw new Error('Failed to fetch stats');
+    return res.json();
+  },
+  // Wait until user is available
+});
+
+
+// 1. Fetch user
+const {
+  data: userdata,
+  isLoading: userLoading,
+} = useQuery<userdata>({
+  queryKey: ['api/users'],
+  queryFn: async () => {
+    const res = await fetch('/api/users');
+    if (!res.ok) throw new Error('Failed to fetch user');
+    return res.json();
+  },
+  enabled: !!stats,
+});
+
+// 3. Fetch medications (after stats are loaded)
+const {
+  data: medications = [],
+  isLoading: medicationsLoading,
+} = useQuery<Medication[]>({
+  queryKey: ['/api/medications'],
+  queryFn: async () => {
+    const res = await fetch('/api/medications');
+    if (!res.ok) throw new Error('Failed to fetch medications');
+    return res.json();
+  },
+   enabled: !!userdata, // Wait until stats are loaded
+});
+
+// 4. Fetch schedules (after medications are loaded)
+const today = new Date().toISOString().split('T')[0];
+const medicationIds = medications.map(medi => medi.id);
+
+const {
+  data: scheduleData = [],
+  isLoading: scheduleLoading,
+} = useQuery<Schedule[]>({
+  queryKey: ['/api/schedules', { date: today, medicationId: medicationIds }],
+  queryFn: async () => {
+    const params = new URLSearchParams();
+    params.append('date', today);
+    // If needed, include medication IDs in query string
+    const res = await fetch(`/api/schedules?date=${params.toString()}`);
+    if (!res.ok) throw new Error('Failed to fetch schedules');
+    return res.json();
+  },
+  enabled: medications.length > 0,
+});
 
   // Process schedules to include medication details
   const schedules = scheduleData.map(schedule => {
@@ -86,7 +157,8 @@ export default function Dashboard() {
       return apiRequest('POST', '/api/medications', newMedication);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/medications'] });
+      queryClient.invalidateQueries({queryKey: ['/api/stats']});
+      queryClient.invalidateQueries({ queryKey: ['/api/medications']});
       toast({
         title: "Medication added",
         description: "Your new medication has been added successfully.",
@@ -99,12 +171,13 @@ export default function Dashboard() {
         description: "Failed to add medication. Please try again.",
         variant: "destructive",
       });
+      console.log(error)
     },
   });
 
   // Update medication mutation
   const updateMedicationMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number, data: Partial<Medication> }) => {
+    mutationFn: async ({ id, data }: { id: string, data: Partial<Medication> }) => {
       return apiRequest('PATCH', `/api/medications/${id}`, data);
     },
     onSuccess: () => {
@@ -127,17 +200,40 @@ export default function Dashboard() {
     markAsTakenMutation.mutate(scheduleId);
   };
 
-  const handleUpdateMedication = (id: number, data: Partial<Medication>) => {
+  const handleUpdateMedication = (id: string, data: Partial<Medication>) => {
     updateMedicationMutation.mutate({ id, data });
   };
+  
+  const DeleteMedication = useMutation({
+    mutationFn:(id:string) => {
+      return apiRequest('delete',`/api/medications/${id}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['/api/stats']});
+      queryClient.invalidateQueries({ queryKey: ['/api/medications']});
+      toast({
+        title: "Medication Deleted",
+        description: "Your medication has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to Delete medication. Please try again.",
+        variant: "destructive",
+      });
+    }
+  })
 
+  const handleDeleteMedication = (id:string) => {
+    DeleteMedication.mutate(id);
+  }
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Desktop Sidebar */}
       {!isMobile && (
         <Sidebar className="hidden md:flex" />
       )}
-
       {/* Mobile Sidebar (shown when toggled) */}
       {isMobile && showSidebar && (
         <div className="fixed inset-0 z-40 flex">
@@ -209,56 +305,34 @@ export default function Dashboard() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">My Medications</h3>
-                <div className="flex space-x-3">
-                  <Button variant="outline" size="sm" className="hidden sm:flex">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                      />
-                    </svg>
-                    Filter
-                  </Button>
-                  <Button variant="outline" size="sm" className="hidden sm:flex">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                      />
-                    </svg>
-                    Sort
-                  </Button>
-                </div>
               </div>
               {medicationsLoading ? (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
                   Loading medications...
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {medications.map((medication) => (
-                    <MedicationCard
-                      key={medication.id}
-                      medication={medication}
-                      onUpdate={handleUpdateMedication}
-                    />
-                  ))}
+                <div className="">
+                  {
+                    medications.length < 1 ?
+                      <div className="flex justify-center items-center flex-col gap-1 h-[400px] ">
+                        <Button onClick={() => setShowAddMedication(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                              Add Medication
+                        </Button>
+                        <h1>Oops, No Medication Found </h1>
+                      </div>
+                      :
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {medications.map((medication) => (
+                          <MedicationCard
+                            key={medication.id}
+                            medication={medication}
+                            onUpdate={handleUpdateMedication}
+                            onDelete={handleDeleteMedication}
+                          />
+                        ))}
+                      </div>
+                  }
                 </div>
               )}
             </section>
@@ -279,8 +353,9 @@ export default function Dashboard() {
             </DialogDescription>
           </DialogHeader>
           <MedicationForm
-            onSubmit={(data) => { addMedicationMutation.mutate(data)}}
+            onSubmit={(data) => { addMedicationMutation.mutate(data) }}
             onCancel={() => setShowAddMedication(false)}
+            user_Id={userdata?.id ?? ""}
           />
         </DialogContent>
       </Dialog>

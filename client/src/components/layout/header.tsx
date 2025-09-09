@@ -38,9 +38,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <SignedOut>
               <SignInButton />
             </SignedOut>
-            <SignedIn>
               <UserButton />
-            </SignedIn>
             </div>
           </div>
         </div>

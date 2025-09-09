@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pill, Eye, Edit } from "lucide-react";
+import { Pill, Eye, Edit,Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +16,15 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { MedicationForm } from "./medication-form";
 import { Medication } from "@shared/schema";
+import { log } from "console";
 
 interface MedicationCardProps {
   medication: Medication;
-  onUpdate: (id: number, data: Partial<Medication>) => void;
+  onUpdate: (id: string, data: Partial<Medication>) => void;
+  onDelete: (id: string) => void;
 }
 
-export function MedicationCard({ medication, onUpdate }: MedicationCardProps) {
+export function MedicationCard({ medication, onUpdate,onDelete }: MedicationCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   
@@ -161,7 +163,7 @@ export function MedicationCard({ medication, onUpdate }: MedicationCardProps) {
                 </DialogHeader>
                 <MedicationForm 
                   defaultValues={medication} 
-                  onSubmit={(data: Partial<{ id: number; name: string; dosage: string; form: "tablet" | "capsule" | "liquid" | "injection" | "patch" | "inhaler" | "cream" | "other"; instructions: string | null; frequency: "other" | "once_daily" | "twice_daily" | "three_times_daily" | "four_times_daily" | "as_needed" | "weekly" | "monthly"; purpose: string | null; startDate: Date; endDate: Date | null; quantity: number; refills: number | null; status: "active" | "inactive" | "completed"; userId: number | null; }>) => {
+                  onSubmit={(data: Partial<{ id: string; name: string; dosage: string; form: "tablet" | "capsule" | "liquid" | "injection" | "patch" | "inhaler" | "cream" | "other"; instructions: string | null; frequency: "other" | "once_daily" | "twice_daily" | "three_times_daily" | "four_times_daily" | "as_needed" | "weekly" | "monthly"; purpose: string | null; startDate: Date; endDate: Date | null; quantity: number; refills: number | null; status: "active" | "inactive" | "completed"; userId:string; }>) => {
                     onUpdate(medication.id, data);
                     setShowEditForm(false);
                   }} 
@@ -169,6 +171,12 @@ export function MedicationCard({ medication, onUpdate }: MedicationCardProps) {
                 />
               </DialogContent>
             </Dialog>
+              <Button variant="outline" size="sm" className="text-gray-700 bg-gray-100 hover:text-white hover:bg-red-600" onClick={() => {
+                onDelete(medication.id)
+              }} >
+                <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+              </Button>
           </div>
         </div>
       </CardContent>

@@ -1,20 +1,16 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import { string, z } from "zod";
 
 // User schema (keeping the existing one)
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id:uuid("id").primaryKey().defaultRandom().notNull(),
   username: text("username").notNull(),
-  email: text("Email").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  email : true,
-  password: true,
-});
+export const insertUserSchema = createInsertSchema(users).omit({id:true});
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -50,7 +46,7 @@ export const statusEnum = pgEnum("status", [
 
 // Main medication table
 export const medications = pgTable("medications", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   dosage: text("dosage").notNull(),
   form: medicationFormEnum("form").notNull(),
@@ -62,29 +58,27 @@ export const medications = pgTable("medications", {
   quantity: integer("quantity").notNull(),
   refills: integer("refills").default(0),
   status: statusEnum("status").default("active").notNull(),
-  userId: integer("user_id").references(() => users.id),
-});
-
+  userId: uuid("user_id").references(() => users.id),
+})
 export const insertMedicationSchema = createInsertSchema(medications)
   .omit({ id: true })
   .extend({
-    userId: z.number().optional(),
-  });
-
+    userId: z.string().optional(),
+    startDate: z.preprocess((val) => new Date(val as string), z.date()),
+});
 export type InsertMedication = z.infer<typeof insertMedicationSchema>;
 export type Medication = typeof medications.$inferSelect;
 
 // Medication schedule/dosage times
 export const schedules = pgTable("schedules", {
   id: serial("id").primaryKey(),
-  medicationId: integer("medication_id").references(() => medications.id).notNull(),
+  medicationId: uuid("medication_id").references(() => medications.id).notNull(),
   timeOfDay: text("time_of_day").notNull(), // stored as HH:MM in 24-hour format
   taken: boolean("taken").default(false),
   scheduledDate: timestamp("scheduled_date").notNull(), // When this dose should be taken
-  takenAt: timestamp("taken_at"), // When it was actually taken (if at all)
 });
 
-export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: true });
+export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: true, taken:true });
 
 export type InsertSchedule = z.infer<typeof insertScheduleSchema>;
 export type Schedule = typeof schedules.$inferSelect;
@@ -92,7 +86,7 @@ export type Schedule = typeof schedules.$inferSelect;
 // Reminders table
 export const reminders = pgTable("reminders", {
   id: serial("id").primaryKey(),
-  medicationId: integer("medication_id").references(() => medications.id).notNull(),
+  medicationId: uuid("medication_id").references(() => medications.id).notNull(),
   time: text("time").notNull(), // stored as HH:MM in 24-hour format
   enabled: boolean("enabled").default(true),
   days: text("days").notNull(), // Comma-separated list of days (e.g., "1,2,3,4,5,6,7" for every day)

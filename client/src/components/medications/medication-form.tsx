@@ -9,7 +9,6 @@ import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -54,10 +53,12 @@ interface MedicationFormProps {
   defaultValues?: Partial<FormValues>;
   onSubmit : (data:FormValues) => void; 
   onCancel: () => void;
+  user_Id:string
   
 }
 
-export function MedicationForm({ defaultValues,onSubmit,onCancel}: MedicationFormProps)
+
+export function MedicationForm({ defaultValues,onSubmit,onCancel,user_Id}: MedicationFormProps)
  {
   
   const form = useForm<FormValues>({
@@ -73,6 +74,7 @@ export function MedicationForm({ defaultValues,onSubmit,onCancel}: MedicationFor
       quantity: 30,
       refills: 0,
       status: "active",
+      userId :user_Id,
       ...defaultValues,
     },
   });
@@ -321,7 +323,7 @@ export function MedicationForm({ defaultValues,onSubmit,onCancel}: MedicationFor
                     placeholder="Number of refills" 
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value) || 0) }
-                    value={field.value}
+                    value={field.value??" x   "}
                   />
                 </FormControl>
                 <FormMessage />

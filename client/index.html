@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>MediTrack</title>
     <link rel="icon" type="image/x-icon" href="./assest/logo.png">
-    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest"></script>
+    <link href="./src//index.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest">
+      window.Buffer = {};
+      window.process = {
+        env : {}
+      }
+    </script>
 
   </head>
   <body>

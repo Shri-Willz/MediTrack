@@ -33,6 +33,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useAuth } from "@clerk/clerk-react";
+import { useMutation } from "@tanstack/react-query";
 
 const schema = z.object({
     email: z.string().email(),
@@ -40,6 +41,7 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+
 
 
 export default function signin() {
@@ -63,12 +65,13 @@ export default function signin() {
     })
 
     if (isSignedIn) {
-        navigate("/dasahboard")
+        navigate("/dashboard")
     }
 
     if (!isLoaded) {
         return null;
     }
+
 
     const onSubmit = async (values: FormValues) => {
 
@@ -81,7 +84,7 @@ export default function signin() {
             });
             if (result.status === "complete") {
                 await setActive({ session: result.createdSessionId });
-                navigate("/dashboard");
+                navigate("/dashboar");
             } else {
                 console.error(JSON.stringify(result, null, 2));
             }

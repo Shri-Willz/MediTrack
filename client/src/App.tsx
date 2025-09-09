@@ -6,13 +6,10 @@ import SignUp from "@/pages/sign-up"
 import SignIn from "@/pages/sign-in"
 import Dashboard from "@/pages/dashboard";
 import Medications from "@/pages/medications";
-import Schedule from "@/pages/schedule";
 import Reminders from "@/pages/reminders";
 import NotFound from "@/pages/not-found";
 import ForgotPass from "@/pages/forgot-pass";
-
-
-
+import Schedule from "@/pages/schedule";
 
 
 
@@ -36,9 +33,10 @@ const router = createBrowserRouter([
   },
   {
     path:"/schedule",
-    element:<Schedule />,
+    element:<Schedule />
+
   },
-   {
+    {
     path:"/reminders",
     element:<Reminders />,
   },
@@ -49,6 +47,8 @@ const router = createBrowserRouter([
 ])
 
 function App() {
+
+
   return (
     <QueryClientProvider client={queryClient}>
        <RouterProvider router={router} />
